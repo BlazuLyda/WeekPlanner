@@ -1,0 +1,10 @@
+{
+  "user1": {
+    "email": "blazej.lytkowski@gmail.com",
+    "blocks" : ["block1", "block2"]
+  },
+  "user2": {
+    "email": "seba.mroz@gmail.com",
+    "blocks" : ["block3", "block4"]
+  }
+}

@@ -9,32 +9,18 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema)
 
-// Database access methods
+// Dataset manipulation methods
 User.getAll = async () => {
-  try {
-    return await User.find()
-  } catch (e) {
-    console.log(e);
-    return {}
-  }
+  return User.find()
 }
 
 User.getOne = async (id) => {
-  try {
-    return await User.find({ _id: id })
-  } catch (e) {
-    // console.log(e);
-    return null
-  }
+  return User.find({ _id: id })
 }
 
-User.findByEmail = async (email) => {
-  try {
-    return await User.find({ email: email })
-  } catch (e) {
-    // console.log(e);
-    return null
-  }
+User.getByEmail = async (email) => {
+  const userData = await User.find({ email: email }).lean()
+  return Array.from(userData)[0]
 }
 
 User.addUser = async (name, email, psw) => {

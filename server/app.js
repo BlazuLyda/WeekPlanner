@@ -1,13 +1,19 @@
-import bodyParser from "body-parser"
+import * as dotenv from 'dotenv'
+dotenv.config()
+
 import express from "express"
-import path from "path"
 import mongoose from "mongoose"
+import cookieParser from "cookie-parser"
+import bodyParser from "body-parser"
 import session from "express-session"
 import connect_mongodb_session from "connect-mongodb-session"
-import usersRouter from "./routers/users.js";
+
+import accountRouter from "./routers/account.js"
+import sessionRouter from "./routers/session.js"
+import { errorHandler } from "./helpers/errorHandler.js"
 
 // Database config
-const MONGODB_URI = "mongodb+srv://mongo:zvXycqaSRMC7zZ6@cluster0.vypym1r.mongodb.net/?retryWrites=true&w=majority"
+const MONGODB_URI = process.env.URI
 await mongoose.connect(MONGODB_URI)
 
 // Session storage config
@@ -19,35 +25,35 @@ const sessionStore = new MongoDBStore({
 
 // Express app config
 const app = express()
-const ROOT = "/api"
 
 // Session storage middleware
 app.use(
   session({
-    secret: "JQKnfBRmONm0Gek1v83T1g3O7NC85ui3",
+    secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
     store: sessionStore,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 } // 30 days
   })
 );
 
 // Body parsing
+app.use(cookieParser());
 app.use(express.json());
 app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-// Path handlers
-app.use(path.join(ROOT, "users"), usersRouter)
+// Request handlers
+app.use("/session", sessionRouter)
+app.use("/account", accountRouter)
 
-app.get("/", (req, res) => {
-  res.send("Hello World!")
-})
 app.get("/create", (req, res) => {
   console.log("sending a file");
   res.sendFile( "/", { root: import.meta.url })
 })
 
+app.use(errorHandler)
 
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {

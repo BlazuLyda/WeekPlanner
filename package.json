@@ -19,11 +19,5 @@
 		"svelte": "^3.54.0",
 		"vite": "^4.0.0"
 	},
-	"type": "module",
-	"dependencies": {
-		"connect-mongodb-session": "^3.1.1",
-		"express": "^4.18.2",
-		"express-session": "^1.17.3",
-		"nodemon": "^2.0.20"
-	}
+	"type": "module"
 }

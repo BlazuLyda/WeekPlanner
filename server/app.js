@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
 import session from "express-session"
 import connect_mongodb_session from "connect-mongodb-session"
+import cors from "cors"
 
 import accountRouter from "./routers/account.js"
 import sessionRouter from "./routers/session.js"
@@ -25,6 +26,7 @@ const sessionStore = new MongoDBStore({
 
 // Express app config
 const app = express()
+app.use(cors())
 
 // Session storage middleware
 app.use(
@@ -51,6 +53,10 @@ app.use("/account", accountRouter)
 app.get("/create", (req, res) => {
   console.log("sending a file");
   res.sendFile( "/", { root: import.meta.url })
+})
+
+app.get("/", (req, res) => {
+  res.json("Hello World!")
 })
 
 app.use(errorHandler)

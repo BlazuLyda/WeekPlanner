@@ -1,10 +1,10 @@
 export function errorHandler(err, req, res, next) {
-  const code = err instanceof Number && err < 600 ? err : 500
-  const message = err.message || "Error"
+  err.code = typeof err.code === "number" && err.code < 600 ? err.code : 500
+  err.message = err.message || "Error"
 
   // Server side error
-  if (code >= 500 && code <= 599) console.log(err)
+  if (err.code >= 500 && err.code <= 599) console.log("Internal server error", err)
 
-  res.status(code)
-  res.json({ code: code, message: message })
+  res.status(err.code)
+  res.json({message: err.message, code: err.code})
 }

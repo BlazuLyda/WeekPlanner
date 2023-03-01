@@ -21,7 +21,7 @@ export async function find(req, res, next) {
 }
 
 export async function edit(req, res, next) {
-  const id = req.query.id
+  const id = req.session.userId
   const name = req.body.name
   const email = req.body.email
   const password = req.body.password
@@ -38,7 +38,7 @@ export async function edit(req, res, next) {
 }
 
 export async function remove(req, res, next) {
-  const id = req.query.id
+  const id = req.session.userId
   try {
     await User.findByIdAndDelete(id)
   } catch (err) {
@@ -56,7 +56,10 @@ export async function create(req, res, next) {
     if (sameEmailCount > 0) {
       return next(new ClientError(`User with email ${email} already exists`))
     }
+
     const newUser = await User.addUser(name, email, password)
+      .catch((err) => { throw new ClientError(err.message, 400) })
+
     res.json({ message: "Account successfully created", data: newUser })
   } catch (err) {
     next(err)

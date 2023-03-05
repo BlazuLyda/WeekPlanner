@@ -1,13 +1,13 @@
 import express from "express"
-import * as controller from "../controllers/accountController.js"
-import { authUser } from "../helpers/auth.js";
+import accountController from "../controllers/accountController.js"
+import sessionController from "../controllers/sessionController.js";
 
 const router = express.Router()
 
-router.use(authUser)
+router.use(sessionController.authUser)
 
-router.get("/", controller.find)
-router.put("/", controller.edit)
-router.delete("/", controller.remove)
+router.get("/", accountController.find)
+router.put("/", accountController.edit)
+router.delete("/", accountController.remove)
 
 export default router

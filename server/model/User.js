@@ -1,5 +1,7 @@
-import mongoose from "mongoose"
-import bcrypt from "bcrypt"
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import { ClientError } from "../helpers/errors.js";
+import { Activity } from "./Activity.js";
 
 // User model
 const userSchema = new mongoose.Schema({
@@ -19,6 +21,19 @@ const userSchema = new mongoose.Schema({
     required: true,
     match: /(?=.*[A-Z]+.*)(?=.*[a-z]+.*)^[\w.\-!#+\/?*@=$%&]{8,40}$/u
   },
+  activityBank: [ Activity ],
+  currentWeek: {
+    type: Map,
+    of: [ Activity ]
+  },
+  nextWeek: {
+    type: Map,
+    of: [ Activity ]
+  },
+  schedules: {
+    type: Map,
+    of: [ Activity ]
+  }
 })
 
 // Password hashing middleware
@@ -30,23 +45,33 @@ userSchema.pre(["save", /[uU]pdate$/], async function(next) {
 })
 
 const User = mongoose.model("User", userSchema)
-export default User
+const UserDAO = {}
+
+export default UserDAO
 
 // Dataset manipulation methods
-User.getAll = async () => {
-  return User.find()
+UserDAO.getAll = async () => {
+  return User.find().exec()
 }
 
-User.getOne = async (id) => {
-  return User.find({ _id: id })
+// Singular methods throw error if nothing is found or modified
+UserDAO.getOne = async (id) => {
+  const userData = await User.findById(id).exec();
+  if (!userData) {
+    throw new ClientError(`User with id ${id} does not exist`, 404)
+  }
+  return userData
 }
 
-User.getByEmail = async (email) => {
-  const userData = await User.find({ email: email }).lean()
-  return Array.from(userData)[0]
+UserDAO.getByEmail = async (email) => {
+  const userData = await User.findOne({ email: email }).exec();
+  if (!userData) {
+    throw new ClientError(`User with email ${email} does not exist`, 404)
+  }
+  return userData
 }
 
-User.addUser = async (name, email, password) => {
+UserDAO.addUser = async (name, email, password) => {
   const newUser = new User({
     name: name,
     email: email,
@@ -55,3 +80,38 @@ User.addUser = async (name, email, password) => {
   await newUser.save()
   return newUser
 }
+
+UserDAO.update = async (id, name, email, password) => {
+  const updatedUser = await User.findByIdAndUpdate(id, {
+    name: name,
+    email: email,
+    password: password
+  }).exec()
+
+  if (!updatedUser) {
+    throw new ClientError(`User with id ${id} does not exist`, 404)
+  }
+  return updatedUser
+}
+
+UserDAO.delete = async (id) => {
+  User.findByIdAndDelete(id)
+}
+
+// Activity bank access methods
+UserDAO.getBank = async (userId) => {
+  const userData = await UserDAO.getOne(userId)
+  return userData.activityBank
+}
+
+UserDAO.addToBank = async (userId, activity) => {
+  const userData = await UserDAO.getOne(userId)
+  userData.activityBank.push(activity)
+  await userData.save()
+}
+
+UserDAO.removeBank = async (userId, activityId) => {
+  const userData = await UserDAO.getOne(userId)
+  return userData.activityBank.findByIdAndDelete(activityId)
+}
+

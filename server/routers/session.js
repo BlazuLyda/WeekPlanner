@@ -1,11 +1,11 @@
 import express from "express"
-import * as controller from "../controllers/sessionController.js"
-import { create as createAccount } from "../controllers/accountController.js";
+import sessionController from "../controllers/sessionController.js"
+import accountController from "../controllers/accountController.js";
 
 const router = express.Router()
 
-router.post("/login", controller.login)
-router.post("/logout", controller.logout)
-router.post("/register", createAccount)
+router.post("/login", sessionController.login)
+router.post("/logout", sessionController.logout)
+router.post("/register", accountController.create)
 
 export default router

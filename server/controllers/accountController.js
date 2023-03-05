@@ -1,67 +1,78 @@
-import User from "../model/User.js"
+import UserDAO from "../model/User.js"
 import { ClientError } from "../helpers/errors.js"
+import mongoose from "mongoose";
 
-export async function view(req, res, next) {
+const accountController = {}
+
+accountController.view = async (req, res, next) => {
   try {
-    const usersData = await User.getAll()
+    const usersData = await UserDAO.getAll()
     res.json(usersData)
   } catch (err) {
     next(err)
   }
 }
 
-export async function find(req, res, next) {
-  const id = req.session.userId
+accountController.find = async (req, res, next) => {
   try {
-    const userData = await User.getOne(id);
+    const id = req.session.userId
+    const userData = await UserDAO.getOne(id)
     res.json(userData);
   } catch (err) {
     next(err)
   }
 }
 
-export async function edit(req, res, next) {
+accountController.edit = async (req, res, next) => {
   const id = req.session.userId
   const name = req.body.name
   const email = req.body.email
   const password = req.body.password
 
   try {
-    if (email !== undefined && await User.getByEmail(email)) {
+    if (email !== undefined && await UserDAO.getByEmail(email)) {
       return next(new ClientError(`User with email ${email} already exists`))
     }
-    const updatedUser = await User.findByIdAndUpdate(id, { name: name, email: email, password: password })
+
+    const updatedUser = await UserDAO.update(id, name, email, password)
     res.json({ message: "Account successfully updated", data: updatedUser })
+
   } catch (err) {
+    if (err instanceof mongoose.Error.ValidatorError) {
+      return next(new ClientError(err.message, 400))
+    }
     next(err)
   }
 }
 
-export async function remove(req, res, next) {
+accountController.remove = async (req, res, next) => {
   const id = req.session.userId
   try {
-    await User.findByIdAndDelete(id)
+    await UserDAO.delete(id)
   } catch (err) {
     next(err)
   }
 }
 
-export async function create(req, res, next) {
+accountController.create = async (req, res, next) => {
   const name = req.body.name
   const email = req.body.email
   const password = req.body.password
 
   try {
-    const sameEmailCount = await User.find({email: email}).count()
-    if (sameEmailCount > 0) {
-      return next(new ClientError(`User with email ${email} already exists`))
-    }
+    const sameEmailCount = await UserDAO.getByEmail(email)
+      .then(() => { throw new ClientError(`User with email ${email} already exists`) })
+      .catch(() => {})
 
-    const newUser = await User.addUser(name, email, password)
-      .catch((err) => { throw new ClientError(err.message, 400) })
-
+    const newUser = await UserDAO.addUser(name, email, password)
     res.json({ message: "Account successfully created", data: newUser })
+
   } catch (err) {
+    if (err instanceof mongoose.Error.ValidatorError) {
+      return next(new ClientError(err.message, 400))
+    }
     next(err)
   }
 }
+
+export default accountController

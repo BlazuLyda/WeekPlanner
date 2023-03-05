@@ -26,7 +26,10 @@ const sessionStore = new MongoDBStore({
 
 // Express app config
 const app = express()
-app.use(cors())
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}))
 
 // Session storage middleware
 app.use(
@@ -34,13 +37,18 @@ app.use(
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: false,
+    unset: "destroy",
     store: sessionStore,
-    cookie: { maxAge: 1000 * 60 * 60 * 24 * 30 } // 30 days
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+      domain: "localhost",
+      sameSite: true
+    }
   })
 );
 
 // Body parsing
-app.use(cookieParser());
+// app.use(cookieParser());
 app.use(express.json());
 app.use(bodyParser.urlencoded({
   extended: true
@@ -53,10 +61,6 @@ app.use("/account", accountRouter)
 app.get("/create", (req, res) => {
   console.log("sending a file");
   res.sendFile( "/", { root: import.meta.url })
-})
-
-app.get("/", (req, res) => {
-  res.json("Hello World!")
 })
 
 app.use(errorHandler)

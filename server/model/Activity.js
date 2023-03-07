@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 
-export enum Background {
-  SKY = "SKY",
-  AQUA = "AQUA",
-  SUNNY = "SUNNY",
+export const Background = {
+  SKY: "SKY",
+  AQUA: "AQUA",
+  SUNNY: "SUNNY",
 }
 
-const activitySchema = new mongoose.Schema({
+export const activitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
   duration: { type: Number, required: true }, // in seconds

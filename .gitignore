@@ -12,4 +12,5 @@ vite.config.ts.timestamp-*
 
 /server/node_modules
 /server/.env
+/server/.flowconfig
 /docs

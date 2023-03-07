@@ -6,6 +6,10 @@ const router = express.Router()
 
 router.use(sessionController.authUser)
 
-router.get("/", bankController.view)
+router.get("/", bankController.all)
 router.post("/", bankController.create)
-router.delete("/", bankController.remove)
+
+router.get("/:activityId", bankController.one)
+router.delete("/:activityId", bankController.remove)
+
+export default router

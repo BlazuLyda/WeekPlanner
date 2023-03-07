@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import { ClientError } from "../helpers/errors.js";
-import { Activity } from "./Activity.js";
+import {ClientError} from "../helpers/errors.js";
+import {activitySchema} from "./Activity.js";
 
 // User model
 const userSchema = new mongoose.Schema({
@@ -18,28 +18,42 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: true,
-    match: /(?=.*[A-Z]+.*)(?=.*[a-z]+.*)^[\w.\-!#+\/?*@=$%&]{8,40}$/u
+    required: true
+    // Password validation in 'pre save' middleware
   },
-  activityBank: [ Activity ],
+  activityBank: [ activitySchema ],
   currentWeek: {
     type: Map,
-    of: [ Activity ]
+    of: [ activitySchema ]
   },
   nextWeek: {
     type: Map,
-    of: [ Activity ]
+    of: [ activitySchema ]
   },
   schedules: {
     type: Map,
-    of: [ Activity ]
+    of: [ activitySchema ]
   }
 })
 
-// Password hashing middleware
-userSchema.pre(["save", /[uU]pdate$/], async function(next) {
+// Password validation and hashing middleware
+userSchema.pre("save", async function (next) {
   if (this.isModified("password") || this.isNew) {
+    if (!this.password.match(/(?=.*[A-Z]+.*)(?=.*[a-z]+.*)^[\w.\-!#+\/?*@=$%&]{8,40}$/u)) {
+      throw new ClientError("Path password does not meet the requirements")
+    }
     this.password = await bcrypt.hash(this.password, 10)
+  }
+  next()
+})
+
+userSchema.pre([/[uU]pdate$/], async function (next) {
+  const newPassword = this.getUpdate().password
+  if (newPassword) {
+    if (!newPassword.match(/(?=.*[A-Z]+.*)(?=.*[a-z]+.*)^[\w.\-!#+\/?*@=$%&]{8,40}$/u)) {
+      throw new ClientError("Path password does not meet the requirements")
+    }
+    this.getUpdate().password = await bcrypt.hash(newPassword, 10)
   }
   next()
 })
@@ -86,6 +100,8 @@ UserDAO.update = async (id, name, email, password) => {
     name: name,
     email: email,
     password: password
+  }, {
+    new: true // gets the updated document
   }).exec()
 
   if (!updatedUser) {
@@ -104,13 +120,27 @@ UserDAO.getBank = async (userId) => {
   return userData.activityBank
 }
 
-UserDAO.addToBank = async (userId, activity) => {
+UserDAO.getFromBank = async (userId, activityId) => {
   const userData = await UserDAO.getOne(userId)
-  userData.activityBank.push(activity)
-  await userData.save()
+  console.log(userData.activityBank, activityId)
+  return userData.activityBank.find((activity) => activity._id.toString() === activityId)
 }
 
-UserDAO.removeBank = async (userId, activityId) => {
+UserDAO.addToBank = async (userId, activity) => {
+  const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $push: { activityBank: activity } },
+      { new: true }
+  )
+      .catch((err) => {
+        console.log(err)
+        throw new ClientError("Invalid activity data")
+      })
+
+  return updatedUser.activityBank.at(-1)
+}
+
+UserDAO.removeFromBank = async (userId, activityId) => {
   const userData = await UserDAO.getOne(userId)
   return userData.activityBank.findByIdAndDelete(activityId)
 }

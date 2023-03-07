@@ -1,9 +1,6 @@
 import * as dotenv from 'dotenv'
-dotenv.config()
-
 import express from "express"
 import mongoose from "mongoose"
-import cookieParser from "cookie-parser"
 import bodyParser from "body-parser"
 import session from "express-session"
 import connect_mongodb_session from "connect-mongodb-session"
@@ -11,10 +8,13 @@ import cors from "cors"
 
 import accountRouter from "./routers/account.js"
 import sessionRouter from "./routers/session.js"
-import { errorHandler } from "./helpers/errorHandler.js"
+import bankRouter from "./routers/bank.js"
+import {errorHandler} from "./helpers/errorHandler.js"
+
+dotenv.config()
 
 // Database config
-const MONGODB_URI = process.env.URI
+const MONGODB_URI = process.env.MONGODB_URI
 await mongoose.connect(MONGODB_URI)
 
 // Session storage config
@@ -27,14 +27,14 @@ const sessionStore = new MongoDBStore({
 // Express app config
 const app = express()
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: process.env.CLIENT_URL,
   credentials: true
 }))
 
 // Session storage middleware
 app.use(
   session({
-    secret: process.env.SECRET,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     unset: "destroy",
@@ -57,6 +57,7 @@ app.use(bodyParser.urlencoded({
 // Request handlers
 app.use("/session", sessionRouter)
 app.use("/account", accountRouter)
+app.use("/bank", bankRouter)
 
 app.get("/create", (req, res) => {
   console.log("sending a file");

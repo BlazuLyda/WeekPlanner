@@ -43,6 +43,19 @@ bankController.create = async (req, res, next) => {
   }
 }
 
+bankController.edit = async (req, res, next) => {
+  try {
+    const updatedTask = await bankDAO.updateBank(req.session.userId, req.params.taskId, req.body)
+    res.json({ updatedTask: updatedTask })
+
+  } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      next(new ClientError(err.message, 400))
+    }
+    next(err)
+  }
+}
+
 bankController.remove = async (req, res, next) => {
   try {
     const deletedTask = await bankDAO.removeFromBank(req.session.userId, req.params.taskId)

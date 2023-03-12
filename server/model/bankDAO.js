@@ -26,6 +26,15 @@ bankDAO.addToBank = async (userId, task) => {
     return userData.taskBank.at(-1)
 }
 
+bankDAO.updateBank = async (userId, taskId, updateData) => {
+    const userData = await userDAO.getOne(userId)
+    const currentTask = userData.taskBank.id(taskId)
+    currentTask.set(updateData)
+    await userData.save()
+
+    return userData.taskBank.id(taskId)
+}
+
 bankDAO.removeFromBank = async (userId, taskId) => {
     const userData = await userDAO.getOne(userId)
     const removedTask = userData.taskBank.id(taskId)

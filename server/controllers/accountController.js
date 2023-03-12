@@ -25,9 +25,7 @@ accountController.find = async (req, res, next) => {
 
 accountController.edit = async (req, res, next) => {
   const id = req.session.userId
-  const name = req.body.name
-  const email = req.body.email
-  const password = req.body.password
+  const { name, email, password } = req.body
 
   try {
     if (email !== undefined && await userDAO.getByEmail(email)) {
@@ -55,12 +53,10 @@ accountController.remove = async (req, res, next) => {
 }
 
 accountController.create = async (req, res, next) => {
-  const name = req.body.name
-  const email = req.body.email
-  const password = req.body.password
+  const { name, email, password } = req.body
 
   try {
-    const sameEmailCount = await userDAO.getByEmail(email)
+    await userDAO.getByEmail(email)
       .then(() => { throw new ClientError(`User with email ${email} already exists`) })
       .catch(() => {})
 

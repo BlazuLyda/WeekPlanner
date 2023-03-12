@@ -9,7 +9,7 @@ const weekController = {}
  * @param {string} req.params.week
  * @param {ObjectId} req.params.activityId
  */
-weekController.all = async (req, res, next) => {
+weekController.allActivities = async (req, res, next) => {
     try {
         const userId = req.session.userId
         const { week, day } = req.params
@@ -22,7 +22,7 @@ weekController.all = async (req, res, next) => {
     }
 }
 
-weekController.one = async (req, res, next) => {
+weekController.oneActivity = async (req, res, next) => {
     try {
         const userId = req.session.userId
         const { week, day, activityId } = req.params
@@ -35,7 +35,7 @@ weekController.one = async (req, res, next) => {
     }
 }
 
-weekController.create = async (req, res, next) => {
+weekController.createActivity = async (req, res, next) => {
     try {
         const userId = req.session.userId
         const { week, day } = req.params

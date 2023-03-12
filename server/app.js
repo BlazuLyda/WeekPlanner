@@ -53,17 +53,13 @@ app.use(
 // Body parsing
 // app.use(cookieParser());
 app.use(express.json());
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Login service
 app.use("/session", sessionRouter)
 
-// User authentication
-app.use(authUser)
-
 // Protected services
+app.use(authUser)
 app.use("/account", accountRouter)
 app.use("/bank", bankRouter)
 app.use("/week", weekRouter)

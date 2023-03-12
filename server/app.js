@@ -9,8 +9,11 @@ import cors from "cors"
 import accountRouter from "./routers/account.js"
 import sessionRouter from "./routers/session.js"
 import bankRouter from "./routers/bank.js"
+import weekRouter from "./routers/week.js"
 import {errorHandler} from "./helpers/errorHandler.js"
+import authUser from "./helpers/authUser.js";
 
+// Environmental variables parser
 dotenv.config()
 
 // Database config
@@ -54,16 +57,18 @@ app.use(bodyParser.urlencoded({
   extended: true
 }));
 
-// Request handlers
+// Login service
 app.use("/session", sessionRouter)
+
+// User authentication
+app.use(authUser)
+
+// Protected services
 app.use("/account", accountRouter)
 app.use("/bank", bankRouter)
+app.use("/week", weekRouter)
 
-app.get("/create", (req, res) => {
-  console.log("sending a file");
-  res.sendFile( "/", { root: import.meta.url })
-})
-
+// Error handling
 app.use(errorHandler)
 
 const PORT = process.env.PORT || 3000

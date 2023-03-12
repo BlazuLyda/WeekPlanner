@@ -1,11 +1,17 @@
-import UserDAO from "../model/User.js";
-import {Activity} from "../model/Activity.js";
+import bankDAO from "../model/bankDAO.js";
+import {Task} from "../model/Task.js";
+import mongoose from "mongoose";
+import {ClientError} from "../helpers/errors.js";
 
 const bankController = {}
 
+/**
+ * @param req.session
+ * @param {ObjectId} req.params.taskId
+ */
 bankController.all = async (req, res, next) => {
   try {
-    const bank = await UserDAO.getBank(req.session.userId)
+    const bank = await bankDAO.getBank(req.session.userId)
     res.json(bank)
 
   } catch (err) {
@@ -15,8 +21,8 @@ bankController.all = async (req, res, next) => {
 
 bankController.one = async (req, res, next) => {
   try {
-    const activity = await UserDAO.getFromBank(req.session.userId, req.params.activityId)
-    res.json({ "activity": activity })
+    const task = await bankDAO.getFromBank(req.session.userId, req.params.taskId)
+    res.json({ "task": task })
 
   } catch (err) {
     next(err)
@@ -25,19 +31,22 @@ bankController.one = async (req, res, next) => {
 
 bankController.create = async (req, res, next) => {
   try {
-    const newActivity = new Activity({ ...req.body })
-    const addedActivity = await UserDAO.addToBank(req.session.userId, newActivity)
-    res.json({ "addedActivity": addedActivity })
+    const newTask = new Task({ ...req.body })
+    const addedTask = await bankDAO.addToBank(req.session.userId, newTask)
+    res.json({ "addedTask": addedTask })
 
   } catch (err) {
+    if (err instanceof mongoose.Error.ValidationError) {
+      next(new ClientError(err.message, 400))
+    }
     next(err)
   }
 }
 
 bankController.remove = async (req, res, next) => {
   try {
-    const deletedActivity = await UserDAO.removeFromBank(req.session.userId, req.params.activityId)
-    res.json({ deletedActivity: deletedActivity })
+    const deletedTask = await bankDAO.removeFromBank(req.session.userId, req.params.taskId)
+    res.json({ deletedTask: deletedTask })
 
   } catch (err) {
     next(err)

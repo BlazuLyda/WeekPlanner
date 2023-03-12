@@ -10,7 +10,7 @@ export const activitySchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
   duration: { type: Number, required: true }, // in seconds
-  startTime: { type: Date },
+  startTime: { type: Number },
   background: { type: String, enum: Background, default: Background.SKY }
 })
 

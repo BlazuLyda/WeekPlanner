@@ -23,5 +23,17 @@ scheduleController.oneSchedule = async (req, res, next) => {
     }
 }
 
+scheduleController.updateScheduleInfo = async (req, res, next) => {
+    try {
+        const userId = req.session.userId
+        const scheduleId = req.params.scheduleId
+        const scheduleData = req.body
+
+        const schedule = await scheduleDAO.getOneSchedule(userId, scheduleId)
+    } catch (err) {
+
+    }
+}
+
 
 export default scheduleController

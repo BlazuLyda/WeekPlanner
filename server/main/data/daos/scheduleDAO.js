@@ -3,13 +3,18 @@ import {ClientError} from "../../helpers/errors.js";
 
 const scheduleDAO = {}
 
-scheduleDAO.getAllSchedules = async (userId) => userDAO.getOne().schedules
-
-scheduleDAO.getOneSchedule = async (userId, scheduleId) => {
-    return await scheduleDAO.getAllSchedules(userId).id(scheduleId) ||
-        throw new ClientError("Schedule with specified id not found for this user", 404)
+scheduleDAO.getAllSchedules = async (userId) => {
+    const userData = await userDAO.getOne(userId)
+    return userData.schedules
 }
 
+scheduleDAO.getOneSchedule = async (userId, scheduleId) => {
+    const schedule = await scheduleDAO.getAllSchedules(userId).id(scheduleId)
+    return schedule || throwScheduleNotFound(scheduleId)
+}
 
+function throwScheduleNotFound(scheduleId) {
+    throw new ClientError(`Schedule with id ${scheduleId} not found`, 404)
+}
 
 export default scheduleDAO

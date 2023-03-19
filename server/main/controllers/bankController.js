@@ -11,7 +11,7 @@ const bankController = {}
  */
 bankController.all = async (req, res, next) => {
   try {
-    const bank = await bankDAO.getBank(req.session.userId)
+    const bank = await bankDAO.getAllTasks(req.session.userId)
     res.json(bank)
 
   } catch (err) {
@@ -21,7 +21,7 @@ bankController.all = async (req, res, next) => {
 
 bankController.one = async (req, res, next) => {
   try {
-    const task = await bankDAO.getFromBank(req.session.userId, req.params.taskId)
+    const task = await bankDAO.getOneTask(req.session.userId, req.params.taskId)
     res.json({ "task": task })
 
   } catch (err) {
@@ -32,7 +32,7 @@ bankController.one = async (req, res, next) => {
 bankController.create = async (req, res, next) => {
   try {
     const newTask = new Task({ ...req.body })
-    const addedTask = await bankDAO.addToBank(req.session.userId, newTask)
+    const addedTask = await bankDAO.addTask(req.session.userId, newTask)
     res.json({ "addedTask": addedTask })
 
   } catch (err) {
@@ -45,7 +45,7 @@ bankController.create = async (req, res, next) => {
 
 bankController.edit = async (req, res, next) => {
   try {
-    const updatedTask = await bankDAO.updateBank(req.session.userId, req.params.taskId, req.body)
+    const updatedTask = await bankDAO.updateTask(req.session.userId, req.params.taskId, req.body)
     res.json({ updatedTask: updatedTask })
 
   } catch (err) {
@@ -58,7 +58,7 @@ bankController.edit = async (req, res, next) => {
 
 bankController.remove = async (req, res, next) => {
   try {
-    const deletedTask = await bankDAO.removeFromBank(req.session.userId, req.params.taskId)
+    const deletedTask = await bankDAO.removeTask(req.session.userId, req.params.taskId)
     res.json({ deletedTask: deletedTask })
 
   } catch (err) {

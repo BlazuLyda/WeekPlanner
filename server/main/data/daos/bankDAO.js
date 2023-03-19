@@ -3,45 +3,43 @@ import userDAO from "./userDAO.js";
 
 const bankDAO = {}
 
-// Activity bank access methods
-bankDAO.getBank = async (userId) => {
+// Task bank data access/manipulation methods
+bankDAO.getAllTasks = async (userId) => {
     const userData = await userDAO.getOne(userId)
     return userData.taskBank
 }
 
-bankDAO.getFromBank = async (userId, taskId) => {
-    const userData = await userDAO.getOne(userId)
-    const task = userData.taskBank.id(taskId)
-    if (!task) {
-        throw new ClientError("Task with specified id does not exist", 404)
-    }
-    return task
+bankDAO.getOneTask = async (userId, taskId) => {
+    const task = bankDAO.getAllTasks(userId).id(taskId)
+    return task || throwTaskNotFound(taskId)
 }
 
-bankDAO.addToBank = async (userId, task) => {
-    const userData = await userDAO.getOne(userId)
-    userData.taskBank.push(task)
-    await userData.save()
-
-    return userData.taskBank.at(-1)
+bankDAO.addTask = async (userId, task) => {
+    const taskBank = bankDAO.getAllTasks(userId)
+    taskBank.push(task)
+    await taskBank.ownerDocument().save()
+    return taskBank.at(-1)
 }
 
-bankDAO.updateBank = async (userId, taskId, updateData) => {
-    const userData = await userDAO.getOne(userId)
-    const currentTask = userData.taskBank.id(taskId)
+bankDAO.updateTask = async (userId, taskId, updateData) => {
+    const currentTask = bankDAO.getOneTask(userId, taskId)
     currentTask.set(updateData)
-    await userData.save()
-
-    return userData.taskBank.id(taskId)
+    await currentTask.ownerDocument().save()
+    return currentTask // TODO check if this work or if I need to return "currentTask.parent().id(currentTask._id)"
 }
 
-bankDAO.removeFromBank = async (userId, taskId) => {
-    const userData = await userDAO.getOne(userId)
-    const removedTask = userData.taskBank.id(taskId)
-    userData.taskBank.id(taskId).remove()
-    await userData.save()
-
+bankDAO.removeTask = async (userId, taskId) => {
+    const removedTask = await bankDAO.getAllTasks(userId).id(taskId)
+    if (!removedTask) {
+        throwTaskNotFound(taskId)
+    }
+    removedTask.remove()
+    await removedTask.ownerDocument().save()
     return removedTask
+}
+
+function throwTaskNotFound(taskId) {
+    throw new ClientError(`Task with id ${taskId} not found`, 404)
 }
 
 export default bankDAO

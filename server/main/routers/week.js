@@ -5,8 +5,8 @@ const router = express.Router()
 
 // Schedule
 router.get("/schedule/:week", weekController.getSchedule)
-router.post("/schedule/:week") // TODO add a schedule to a week
-router.delete("/schedule/:week") // TODO remove schedule from the week
+router.post("/schedule/:week", weekController.addSchedule)
+router.delete("/schedule/:week", weekController.removeSchedule)
 
 // Activities
 router.get("/activities/:week/:day", weekController.allActivities)
@@ -14,7 +14,7 @@ router.post("/activities/:week/:day", weekController.createActivity)
 
 router.get("/activities/:week/:day/:activityId", weekController.oneActivity)
 router.put("/activities/:week/:day/:activityId") // TODO modify activities within a week
-router.delete("/activities/:week/:day/:activityId") // TODO delete activities from a week
+router.delete("/activities/:week/:day/:activityId", weekController.removeActivity)
 
 // Tasks
 router.get("/tasks/:week/:day") // TODO view all tasks from a week

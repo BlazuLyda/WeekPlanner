@@ -19,9 +19,10 @@ weekController.getSchedule = async (req, res, next) => {
         const schedule = await scheduleDAO.getOneSchedule(userId, scheduleId)
 
         if (!schedule) {
-            return next(new ClientError("Schedule associated with this week not found", 404))
+            return next(new ClientError(`No schedule set for the ${week} week`, 404))
         }
         res.json({ schedule: schedule })
+
     } catch (err) {
         next(err)
     }
@@ -35,8 +36,8 @@ weekController.addSchedule = async (req, res, next) => {
 
         if (currentScheduleId) {
             const errorMessage = currentScheduleId === scheduleId ?
-                "This schedule is already applied to this week" :
-                "The week has already a schedule assigned, you should delete it first"
+                `Schedule ${scheduleId} is already applied to this week` :
+                `The week has already a schedule ${currentScheduleId} assigned, you should delete it first`
             return next(new ClientError(errorMessage))
         }
 
@@ -45,14 +46,37 @@ weekController.addSchedule = async (req, res, next) => {
         for (const activity of activitiesToAdd) {
             await weekDAO.addActivity(userId, week, activity.dayOfWeek, activity)
         }
-        res.json({ message: `${activitiesToAdd.length} activities added to the ${week} week`})
+        res.json({ message: `Schedule ${scheduleId} added to the ${week} week`, addedActivitiesCount: activitiesToAdd.length })
 
     } catch (err) {
         next(err)
     }
 }
 
-weekController.remove
+weekController.removeSchedule = async (req, res, next) => {
+    try {
+        const userId = req.session.userId
+        const week = req.params.week
+        const currentScheduleId = await weekDAO.getScheduleId(userId, week)
+
+        if (!currentScheduleId) {
+            return next(new ClientError(`There isn't any schedule set for the ${week} week, cannot delete`, 404))
+        }
+
+        await weekDAO.setScheduleId(userId, week, null)
+        const activitiesToRemove = await scheduleDAO.getOneSchedule(userId, currentScheduleId).activities
+        let removeCount = 0
+        for (const activity in activitiesToRemove) {
+            await weekDAO.removeActivity(userId, week, activity.dayOfWeek, activity._id)
+                .then(() => removeCount++)
+                .catch((err) => { })
+        }
+        res.json({ message: `Schedule ${currentScheduleId} removed from the ${week} week`, removedActivitiesCount: removeCount})
+
+    } catch (err) {
+        next(err)
+    }
+}
 
 weekController.allActivities = async (req, res, next) => {
     try {
@@ -60,7 +84,7 @@ weekController.allActivities = async (req, res, next) => {
         const { week, day } = req.params
 
         const activities = await weekDAO.getActivities(userId, week, day)
-        res.json({ "activities" : activities })
+        res.json({ activities: activities })
 
     } catch (err) {
         next(err)
@@ -73,7 +97,7 @@ weekController.oneActivity = async (req, res, next) => {
         const { week, day, activityId } = req.params
 
         const activity = await weekDAO.getActivity(userId, week, day, activityId)
-        res.json({ "activity": activity })
+        res.json({ activity: activity })
 
     } catch (err) {
         next(err)
@@ -87,13 +111,25 @@ weekController.createActivity = async (req, res, next) => {
         const newActivity = new Activity({ ...req.body })
 
         const addedActivity = await weekDAO.addActivity(userId, week, day, newActivity)
-        res.json({ "addedActivity": addedActivity })
+        res.json({ addedActivity: addedActivity })
 
     } catch (err) {
         next(err)
     }
 }
 
+weekController.removeActivity = async (req, res, next) => {
+    try {
+        const userId = req.session.userId
+        const { week, day, activityId } = req.params
+
+        const removedActivity = await weekDAO.removeActivity(userId, week, day, activityId)
+        res.json({ removedActivity: removedActivity })
+
+    } catch (err) {
+        next(err)
+    }
+}
 
 
 

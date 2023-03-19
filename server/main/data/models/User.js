@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import {ClientError} from "../helpers/errors.js";
+import {ClientError} from "../../helpers/errors.js";
 import {activitySchema} from "./Activity.js";
 import {weekSchema} from "./Week.js";
 import {taskSchema} from "./Task.js";

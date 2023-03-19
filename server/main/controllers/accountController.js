@@ -1,4 +1,4 @@
-import userDAO from "../model/userDAO.js"
+import userDAO from "../data/daos/userDAO.js"
 import {ClientError} from "../helpers/errors.js"
 import mongoose from "mongoose";
 

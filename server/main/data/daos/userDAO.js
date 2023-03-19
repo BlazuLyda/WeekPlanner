@@ -1,5 +1,5 @@
-import {ClientError} from "../helpers/errors.js";
-import User from "./User.js";
+import {ClientError} from "../../helpers/errors.js";
+import User from "../models/User.js";
 
 const userDAO = {}
 
@@ -48,6 +48,10 @@ userDAO.update = async (id, name, email, password) => {
         throw new ClientError(`User with id ${id} does not exist`, 404)
     }
     return updatedUser
+}
+
+userDAO.save = async (userObject) => {
+    await userObject.save()
 }
 
 userDAO.delete = async (id) => {

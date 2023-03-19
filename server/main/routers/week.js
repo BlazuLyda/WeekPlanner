@@ -4,7 +4,7 @@ import weekController from "../controllers/weekController.js"
 const router = express.Router()
 
 // Schedule
-router.get("/schedule/:week") // TODO get the schedule for a week
+router.get("/schedule/:week", weekController.getSchedule)
 router.post("/schedule/:week") // TODO add a schedule to a week
 router.delete("/schedule/:week") // TODO remove schedule from the week
 

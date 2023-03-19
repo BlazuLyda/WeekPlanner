@@ -1,6 +1,6 @@
 import {ClientError} from "../helpers/errors.js";
 import bcrypt from "bcrypt";
-import userDAO from "../model/userDAO.js";
+import userDAO from "../data/daos/userDAO.js";
 
 const sessionController = {}
 

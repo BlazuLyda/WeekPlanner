@@ -1,4 +1,4 @@
-import {ClientError} from "../helpers/errors.js";
+import {ClientError} from "../../helpers/errors.js";
 import userDAO from "./userDAO.js";
 
 const bankDAO = {}

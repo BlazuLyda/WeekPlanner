@@ -1,5 +1,5 @@
-import bankDAO from "../model/bankDAO.js";
-import {Task} from "../model/Task.js";
+import bankDAO from "../data/daos/bankDAO.js";
+import {Task} from "../data/models/Task.js";
 import mongoose from "mongoose";
 import {ClientError} from "../helpers/errors.js";
 

@@ -1,5 +1,5 @@
 import {ClientError} from "./errors.js";
-import userDAO from "../model/userDAO.js";
+import userDAO from "../data/daos/userDAO.js";
 
 const authUser = async (req, res, next) => {
     try {
